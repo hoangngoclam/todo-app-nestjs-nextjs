@@ -6,7 +6,7 @@ services:
     platform: linux/x86_64
     restart: always
     volumes:
-      - mydata:/var/lib/mysql
+      - todoAppData:/var/lib/mysql
     ports:
       - "3306:3306"
     environment:
@@ -22,4 +22,4 @@ services:
       - PMA_ARBITRARY=1
   
 volumes:
-  mydata:
+  todoAppData:
