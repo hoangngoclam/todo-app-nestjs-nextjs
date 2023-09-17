@@ -1,12 +1,10 @@
 'use client';
+import TodoHeader from '@/components/TodoHeader';
+import TodoItem from '@/components/TodoItem';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useTheme } from 'next-themes';
-import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
 import { useForm, type FieldValues } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
-import { BsSun, BsMoon } from 'react-icons/bs';
-import { RxCross2 } from 'react-icons/rx';
 import { z } from 'zod';
 
 const modeOptions = [
@@ -33,10 +31,16 @@ export default function Home() {
   const { register, handleSubmit, reset } = useForm<TodoForm>({
     resolver: zodResolver(todoSchema),
   });
-  const { theme, systemTheme, setTheme } = useTheme();
-  const currentTheme = theme === 'system' ? systemTheme : theme;
+  
+  
   const [mode, setMode] = useState<Mode>('All');
   const [todos, setTodos] = useState<Todo[]>([]);
+
+  const myTodos = {
+    All: todos,
+    Active: todos.filter((todo) => !todo.completed),
+    Completed: todos.filter((todo) => todo.completed),
+  }[mode];
 
   const DragItem = useRef<number | null>(null);
   const DragOverItem = useRef<number | null>(null);
@@ -96,12 +100,6 @@ export default function Home() {
     reset();
   };
 
-  const myTodos = {
-    All: todos,
-    Active: todos.filter((todo) => !todo.completed),
-    Completed: todos.filter((todo) => todo.completed),
-  }[mode];
-
   useEffect(() => {
     const data = localStorage.getItem('todos');
     if (data) {
@@ -116,24 +114,11 @@ export default function Home() {
   const activeTodosLength = todos.filter((todo) => !todo.completed).length;
 
   return (
-    <main className='relative flex h-screen justify-center p-5'>
-      <div className='content mt-32 w-[500px]'>
-        <div className='text mb-10 flex items-center justify-between text-white'>
-          <h1 className='text-4xl font-bold tracking-widest '>TODO</h1>
-          <div
-            className='mode cursor-pointer'
-            onClick={() =>
-              theme == 'dark' ? setTheme('light') : setTheme('dark')
-            }
-          >
-            {currentTheme === 'light' ? (
-              <BsMoon size={30} />
-            ) : (
-              <BsSun size={30} />
-            )}
-          </div>
-        </div>
-        <form className='mb-10' onSubmit={handleSubmit(onsubmit)}>
+    <main className='relative h-screen justify-center p-5'>
+      <TodoHeader/>
+
+      <div className='content mx-auto w-[500px]'>
+        <form className='mx-10' onSubmit={handleSubmit(onsubmit)}>
           <input
             type='text'
             className='dark:-bg--clr-DarkTheme-VeryDarkDesaturatedBlue w-full rounded-md p-5 shadow-lg focus:border-none focus:outline-none'
@@ -145,33 +130,15 @@ export default function Home() {
         <div className='results dark:-bg--clr-DarkTheme-VeryDarkDesaturatedBlue bg-white shadow-lg'>
           {myTodos.map((todo) => {
             return (
-              <label
-                htmlFor={`todo${todo.id}`}
-                draggable='true'
-                onDragStart={() => (DragItem.current = todo.id)}
-                onDragEnter={() => (DragOverItem.current = todo.id)}
-                onDragEnd={handleSortByDrag}
-                className='text dark:-border--clr-DarkTheme-VeryDarkGrayishBlue group relative flex w-full cursor-pointer items-center gap-5 border-b px-8 py-5 capitalize focus:border-none focus:outline-none '
+              <TodoItem
+                todo={todo}
                 key={todo.id}
-              >
-                <input
-                  type='checkbox'
-                  name={todo.text}
-                  id={`todo${todo.id}`}
-                  value={todo.text}
-                  defaultChecked={todo.completed}
-                  className='todoCheckBox linearGradientCustom peer'
-                  onClick={() => handleClick(todo?.id)}
-                />
-                <span className='circle peer-checked:linearGradientCustom -ring--clr-LightTheme-LightGrayishBlue dark:-ring--clr-DarkTheme-DarkGrayishBlue/30 ring-1 group-hover:ring-[#d582ee] peer-checked:ring-0' />
-                <div className='text -text--clr-LightTheme-VeryDarkGrayishBlue dark:-text--clr-DarkTheme-LightGrayishBlue peer-checked:-text--clr-LightTheme-DarkGrayishBlue dark:peer-checked:-text--clr-LightTheme-DarkGrayishBlue peer-checked:line-through'>
-                  {todo.text}
-                </div>
-                <RxCross2
-                  className='absolute right-5 top-1/2 block -translate-y-1/2 group-hover:block md:hidden'
-                  onClick={() => handleDelete(todo.id)}
-                />
-              </label>
+                handleSortByDrag={handleSortByDrag}
+                handleClick={handleClick}
+                handleDelete={handleDelete}
+                DragItem={DragItem}
+                DragOverItem={DragOverItem}
+              ></TodoItem>
             );
           })}
           {todos.length > 0 && (
@@ -222,19 +189,6 @@ export default function Home() {
           Drag and drop to reorder list
         </div>
       </div>
-
-      <Image
-        src={`/images/${
-          currentTheme === 'light' ? 'bg-desktop-light' : 'bg-desktop-dark'
-        }.jpg`}
-        className='absolute left-0 top-0 -z-10 h-2/5 w-full select-none object-cover'
-        width={1440}
-        height={300}
-        alt='TopImage'
-      />
-      <div
-        className={`absolute bottom-0 left-0 -z-10 h-3/5 w-full bg-white transition-colors duration-300 dark:bg-[#181824]`}
-      />
     </main>
   );
 }
