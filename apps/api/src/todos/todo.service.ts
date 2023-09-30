@@ -1,16 +1,24 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { Todo } from './todo.entity';
-import { Repository } from 'typeorm';
+import { Repository, SelectQueryBuilder } from 'typeorm';
 import { CreateTodoDto } from './dtos/create-todo.dto';
 import { PaginationDto, PageMetaDto } from '../dtos/pagination.dto';
+import { GetTodoQueryDto } from './dtos/getTodoQuery.dto';
 
 export class TodoService {
   constructor(@InjectRepository(Todo) private todoRepo: Repository<Todo>) {}
 
-  async getTodos() {
-    const todos = await this.todoRepo.find();
-
-    return new PaginationDto(todos, new PageMetaDto(1, 50, 200));
+  async getTodos({ is_completed, name }: GetTodoQueryDto) {
+    const todos: SelectQueryBuilder<Todo> =
+      await this.todoRepo.createQueryBuilder();
+    if (is_completed) {
+      todos.andWhere({ is_completed: is_completed });
+    }
+    if (name) {
+      todos.andWhere('title like :name', { name: `%${name}%` });
+    }
+    const todosResult = await todos.getMany();
+    return new PaginationDto(todosResult, new PageMetaDto(1, 50, 200));
   }
 
   async getOneTodo(id: number) {

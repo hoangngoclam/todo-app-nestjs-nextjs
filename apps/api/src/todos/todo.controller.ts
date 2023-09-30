@@ -1,9 +1,10 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { TodoService } from './todo.service';
 import { CreateTodoDto } from './dtos/create-todo.dto';
 import { Serialize } from '../interceptors/serialize.Interceptor';
 import { TodoDto } from './dtos/todo.dto';
 import { RequestListPaginationDto } from './dtos/pagination-todo.dto';
+import { GetTodoQueryDto } from './dtos/getTodoQuery.dto';
 
 @Controller('todos')
 export class TodoController {
@@ -11,8 +12,8 @@ export class TodoController {
 
   @Get()
   @Serialize(RequestListPaginationDto)
-  getTodos() {
-    return this.todoService.getTodos();
+  getTodos(@Query() query: GetTodoQueryDto) {
+    return this.todoService.getTodos(query);
   }
 
   @Serialize(TodoDto)
