@@ -3,13 +3,14 @@ import { TodoService } from './todo.service';
 import { CreateTodoDto } from './dtos/create-todo.dto';
 import { Serialize } from '../interceptors/serialize.Interceptor';
 import { TodoDto } from './dtos/todo.dto';
+import { RequestListPaginationDto } from './dtos/pagination-todo.dto';
 
 @Controller('todos')
 export class TodoController {
   constructor(private todoService: TodoService) {}
 
   @Get()
-  @Serialize(TodoDto)
+  @Serialize(RequestListPaginationDto)
   getTodos() {
     return this.todoService.getTodos();
   }

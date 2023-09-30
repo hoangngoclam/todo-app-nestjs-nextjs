@@ -5,7 +5,8 @@ import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TodoModule } from './todos/todo.module';
 import { Todo } from './todos/todo.entity';
-import { User } from './todos/user.entity';
+import { User } from './users/user.entity';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { User } from './todos/user.entity';
       synchronize: process.env.DB_SYNC === 'true',
     }),
     TodoModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService],

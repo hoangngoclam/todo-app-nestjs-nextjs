@@ -2,12 +2,15 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Todo } from './todo.entity';
 import { Repository } from 'typeorm';
 import { CreateTodoDto } from './dtos/create-todo.dto';
+import { PaginationDto, PageMetaDto } from '../dtos/pagination.dto';
 
 export class TodoService {
   constructor(@InjectRepository(Todo) private todoRepo: Repository<Todo>) {}
 
   async getTodos() {
-    return await this.todoRepo.find();
+    const todos = await this.todoRepo.find();
+
+    return new PaginationDto(todos, new PageMetaDto(1, 50, 200));
   }
 
   async getOneTodo(id: number) {
