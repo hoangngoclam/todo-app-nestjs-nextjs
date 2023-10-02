@@ -18,6 +18,9 @@ export class Todo {
   @Column({ default: false })
   is_completed: boolean;
 
+  @Column({ default: 1 })
+  order: number;
+
   @Column()
   updated_at: Date;
 

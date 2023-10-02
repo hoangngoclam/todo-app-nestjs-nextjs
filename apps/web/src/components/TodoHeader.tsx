@@ -11,7 +11,7 @@ export default function TodoHeader() {
         src={`/images/${
           currentTheme === 'light' ? 'bg-desktop-light' : 'bg-desktop-dark'
         }.jpg`}
-        className='absolute left-0 top-0 -z-10 h-2/5 w-full select-none object-cover'
+        className='absolute left-0 top-0 -z-10 select-none object-cover'
         width={1440}
         height={300}
         alt='TopImage'

@@ -4,8 +4,8 @@ import { RxCross2 } from 'react-icons/rx';
 type TodoItemProps = {
   todo: {
     id: number;
-    text: string;
-    completed: boolean;
+    title: string;
+    is_completed: boolean;
   };
   handleSortByDrag: React.DragEventHandler;
   handleClick: Function;
@@ -34,16 +34,16 @@ export default function TodoItem({
     >
       <input
         type='checkbox'
-        name={todo.text}
+        name={todo.title}
         id={`todo${todo.id}`}
-        value={todo.text}
-        defaultChecked={todo.completed}
+        value={todo.title}
+        defaultChecked={todo.is_completed}
         className='todoCheckBox linearGradientCustom peer'
         onClick={() => handleClick(todo?.id)}
       />
       <span className='circle peer-checked:linearGradientCustom -ring--clr-LightTheme-LightGrayishBlue dark:-ring--clr-DarkTheme-DarkGrayishBlue/30 ring-1 group-hover:ring-[#d582ee] peer-checked:ring-0' />
       <div className='text -text--clr-LightTheme-VeryDarkGrayishBlue dark:-text--clr-DarkTheme-LightGrayishBlue peer-checked:-text--clr-LightTheme-DarkGrayishBlue dark:peer-checked:-text--clr-LightTheme-DarkGrayishBlue peer-checked:line-through'>
-        {todo.text}
+        {todo.title}
       </div>
       <RxCross2
         className='absolute right-5 top-1/2 block -translate-y-1/2 group-hover:block md:hidden'

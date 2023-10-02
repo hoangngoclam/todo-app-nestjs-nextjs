@@ -35,6 +35,7 @@ export class TodoService {
   async createTodo(data: CreateTodoDto) {
     const newTodo = this.todoRepo.create({
       ...data,
+      user_id: 2,
       created_at: new Date(),
       updated_at: new Date(),
     });

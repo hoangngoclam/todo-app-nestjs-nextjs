@@ -9,5 +9,8 @@ export class TodoDto {
   id: number;
 
   @Expose()
+  is_completed: boolean;
+
+  @Expose()
   user: UserDto;
 }

@@ -1,6 +1,7 @@
 'use client';
 import TodoHeader from '@/components/TodoHeader';
 import TodoItem from '@/components/TodoItem';
+import fetchJson from '@/lib/fetchJson';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useRef, useState } from 'react';
 import { useForm, type FieldValues } from 'react-hook-form';
@@ -16,30 +17,39 @@ const modeOptions = [
 type Mode = (typeof modeOptions)[number]['value'];
 
 const todoSchema = z.object({
-  text: z.string().nonempty(),
+  title: z.string().nonempty(),
 });
 
 type TodoForm = z.infer<typeof todoSchema>;
 
 type Todo = {
   id: number;
-  text: string;
-  completed: boolean;
+  title: string;
+  is_completed: boolean;
 };
 
 export default function Home() {
   const { register, handleSubmit, reset } = useForm<TodoForm>({
     resolver: zodResolver(todoSchema),
   });
-  
-  
+
   const [mode, setMode] = useState<Mode>('All');
   const [todos, setTodos] = useState<Todo[]>([]);
 
+  useEffect(() => {
+    async function fetchTodoAPI() {
+      const todoDataApi = await fetchJson('http://localhost:3000/api/todos');
+      return todoDataApi;
+    }
+    fetchTodoAPI().then((data) => {
+      setTodos(data.items);
+    });
+  }, []);
+
   const myTodos = {
     All: todos,
-    Active: todos.filter((todo) => !todo.completed),
-    Completed: todos.filter((todo) => todo.completed),
+    Active: todos.filter((todo) => !todo.is_completed),
+    Completed: todos.filter((todo) => todo.is_completed),
   }[mode];
 
   const DragItem = useRef<number | null>(null);
@@ -63,7 +73,7 @@ export default function Home() {
     setTodos((prevTodos) => {
       const newTodos = prevTodos.map((todo) => {
         if (todo.id === id) {
-          return { ...todo, completed: !todo.completed };
+          return { ...todo, completed: !todo.is_completed };
         }
         return todo;
       });
@@ -80,7 +90,7 @@ export default function Home() {
 
   const handleClearCompleted = () => {
     setTodos((prevTodos) => {
-      const newTodos = prevTodos.filter((todo) => !todo.completed);
+      const newTodos = prevTodos.filter((todo) => !todo.is_completed);
       return newTodos;
     });
     localStorage.setItem('todos', JSON.stringify(todos));
@@ -88,13 +98,25 @@ export default function Home() {
 
   const onsubmit = (data: TodoForm) => {
     const todoExists = todos?.some((todo) => {
-      return todo?.text?.toLowerCase() === data?.text?.toLowerCase();
+      return todo?.title?.toLowerCase() === data?.title?.toLowerCase();
     });
     if (todoExists) {
       toast.error('Todo already exists');
     }
+    fetchJson('http://localhost:3000/api/todos', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ title: data.title }),
+    });
+
     if (!todoExists) {
-      const newTodo = { id: Date.now(), text: data.text, completed: false };
+      const newTodo = {
+        id: Date.now(),
+        title: data.title,
+        is_completed: false,
+      };
       setTodos((prev) => [...prev, newTodo]);
     }
     reset();
@@ -111,11 +133,11 @@ export default function Home() {
     localStorage.setItem('todos', JSON.stringify(todos));
   }, [todos]);
 
-  const activeTodosLength = todos.filter((todo) => !todo.completed).length;
+  const activeTodosLength = todos.filter((todo) => !todo.is_completed).length;
 
   return (
     <main className='relative h-screen justify-center p-5'>
-      <TodoHeader/>
+      <TodoHeader />
 
       <div className='content mx-auto w-[500px]'>
         <form className='mx-10' onSubmit={handleSubmit(onsubmit)}>
@@ -124,7 +146,7 @@ export default function Home() {
             className='dark:-bg--clr-DarkTheme-VeryDarkDesaturatedBlue w-full rounded-md p-5 shadow-lg focus:border-none focus:outline-none'
             placeholder='Create a new todo...'
             autoComplete='off'
-            {...register('text')}
+            {...register('title')}
           />
         </form>
         <div className='results dark:-bg--clr-DarkTheme-VeryDarkDesaturatedBlue bg-white shadow-lg'>
